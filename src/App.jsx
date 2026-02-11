@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Plus, Package, AlertCircle, Loader2, LayoutDashboard, CheckCircle, XCircle, RefreshCcw } from 'lucide-react'
+import { Plus, Package, AlertCircle, Loader2, LayoutDashboard, CheckCircle, XCircle, RefreshCcw, Menu, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from './lib/supabase'
 import ProductList from './components/ProductList'
@@ -55,6 +55,7 @@ function App() {
   const [activeFilter, setActiveFilter] = useState('All')
   const [error, setError] = useState(null)
   const [actionLoading, setActionLoading] = useState({ isLoading: false, message: '' })
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   useEffect(() => {
     fetchProducts()
@@ -93,9 +94,15 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <div className="app-container">
+      <div className={`app-container ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+        {/* Sidebar Overlay */}
+        <div
+          className="sidebar-overlay"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+
         {/* Sidebar */}
-        <aside className="sidebar">
+        <aside className={`sidebar ${isSidebarOpen ? 'mobile-show' : ''}`}>
           <div className="sidebar-header">
             <div className="logo-container">
               <h1 className="logo-text">
@@ -103,11 +110,20 @@ function App() {
               </h1>
               <span className="logo-slogan">Secure Inventory Node</span>
             </div>
+            <button
+              className="close-sidebar-btn"
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <X size={24} />
+            </button>
           </div>
 
           <nav className="sidebar-nav">
             <button
-              onClick={() => setActiveFilter('All')}
+              onClick={() => {
+                setActiveFilter('All')
+                setIsSidebarOpen(false)
+              }}
               className={`nav-item ${activeFilter === 'All' ? 'active' : ''}`}
             >
               <div className="nav-item-content">
@@ -118,7 +134,10 @@ function App() {
             </button>
 
             <button
-              onClick={() => setActiveFilter('Available')}
+              onClick={() => {
+                setActiveFilter('Available')
+                setIsSidebarOpen(false)
+              }}
               className={`nav-item ${activeFilter === 'Available' ? 'active' : ''}`}
             >
               <div className="nav-item-content">
@@ -129,7 +148,10 @@ function App() {
             </button>
 
             <button
-              onClick={() => setActiveFilter('Not Available')}
+              onClick={() => {
+                setActiveFilter('Not Available')
+                setIsSidebarOpen(false)
+              }}
               className={`nav-item ${activeFilter === 'Not Available' ? 'active' : ''}`}
             >
               <div className="nav-item-content">
@@ -176,22 +198,31 @@ function App() {
         <main className="main-layout">
           <div className="content-wrapper">
             <header className="page-header">
-              <div>
-                <h2 className="text-3xl font-bold mb-2">
-                  {activeFilter === 'All' ? 'Inventory Grid' : activeFilter === 'Available' ? 'Available Stock' : 'Out of Inventory'}
-                </h2>
-                <p className="text-[#94a3b8]">
-                  {activeFilter === 'All'
-                    ? 'Global management interface for store assets'
-                    : `Filtering by status: ${activeFilter.toLowerCase()}`}
-                </p>
+              <div className="header-left">
+                <button
+                  className="mobile-menu-btn"
+                  onClick={() => setIsSidebarOpen(true)}
+                >
+                  <Menu size={24} />
+                </button>
+                <div>
+                  <h2 className="text-3xl font-bold mb-2">
+                    {activeFilter === 'All' ? 'Inventory Grid' : activeFilter === 'Available' ? 'Available Stock' : 'Out of Inventory'}
+                  </h2>
+                  <p className="text-[#94a3b8] hidden-mobile">
+                    {activeFilter === 'All'
+                      ? 'Global management interface for store assets'
+                      : `Filtering by status: ${activeFilter.toLowerCase()}`}
+                  </p>
+                </div>
               </div>
               <button
                 onClick={() => setIsModalOpen(true)}
                 className="btn-primary"
               >
                 <Plus size={20} />
-                Deploy Product
+                <span className="hidden-mobile">Deploy Product</span>
+                <span className="show-mobile">Add</span>
               </button>
             </header>
 
