@@ -282,47 +282,57 @@ function App() {
             )}
 
 
-            <div className="premium-card min-h-[500px] overflow-hidden relative">
-              <AnimatePresence mode="wait">
-                {loading ? (
-                  <motion.div
-                    key="loader"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="flex flex-col items-center justify-center h-[500px] text-[#94a3b8] gap-6"
-                  >
-                    <div className="relative">
-                      <div className="w-16 h-16 border-4 border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin"></div>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <Loader2 className="animate-pulse text-indigo-400" size={24} />
+            {currentView === 'inventory' ? (
+              <div className="premium-card min-h-[500px] overflow-hidden relative">
+                <AnimatePresence mode="wait">
+                  {loading ? (
+                    <motion.div
+                      key="loader"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex flex-col items-center justify-center h-[500px] text-[#94a3b8] gap-6"
+                    >
+                      <div className="relative">
+                        <div className="w-16 h-16 border-4 border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin"></div>
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <Loader2 className="animate-pulse text-indigo-400" size={24} />
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex flex-col items-center">
-                      <p className="text-lg font-medium text-white">Syncing Ledger...</p>
-                      <p className="text-xs uppercase tracking-widest opacity-50">Establishing secure tunnel</p>
-                    </div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key={currentView}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="h-full"
-                  >
-                    {currentView === 'inventory' ? (
+                      <div className="flex flex-col items-center">
+                        <p className="text-lg font-medium text-white">Syncing Ledger...</p>
+                        <p className="text-xs uppercase tracking-widest opacity-50">Establishing secure tunnel</p>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="inventory"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="h-full"
+                    >
                       <ProductList
                         products={filteredProducts}
                         onRefresh={fetchProducts}
                         setActionLoading={setActionLoading}
                       />
-                    ) : (
-                      <OrderList setActionLoading={setActionLoading} />
-                    )}
-                  </motion.div>
-                )}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key="orders"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  className="h-full"
+                >
+                  <OrderList setActionLoading={setActionLoading} />
+                </motion.div>
               </AnimatePresence>
-            </div>
+            )}
           </div>
         </main>
 
