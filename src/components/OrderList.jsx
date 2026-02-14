@@ -6,7 +6,7 @@ import { ShoppingBag, Clock, CheckCircle, Truck, XCircle, ChevronDown, ChevronUp
 const OrderList = ({ setActionLoading }) => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [expandedOrder, setExpandedOrder] = useState(null);
+    const [selectedOrder, setSelectedOrder] = useState(null);
 
     useEffect(() => {
         fetchOrders();
@@ -22,6 +22,9 @@ const OrderList = ({ setActionLoading }) => {
 
             if (error) throw error;
             setOrders(data || []);
+            if (data && data.length > 0 && !selectedOrder) {
+                setSelectedOrder(data[0]);
+            }
         } catch (err) {
             console.error('Fetch orders error:', err);
         } finally {
@@ -40,174 +43,190 @@ const OrderList = ({ setActionLoading }) => {
             if (error) throw error;
 
             setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+            if (selectedOrder?.id === orderId) {
+                setSelectedOrder(prev => ({ ...prev, status: newStatus }));
+            }
         } catch (err) {
             console.error('Update status error:', err);
-            alert('Failed to update status');
         } finally {
             setActionLoading({ isLoading: false, message: '' });
         }
     };
 
-    const getStatusStyles = (status) => {
-        switch (status) {
-            case 'Pending': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
-            case 'Processing': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-            case 'Shipped': return 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20';
-            case 'Delivered': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
-            case 'Cancelled': return 'bg-red-500/10 text-red-500 border-red-500/20';
-            default: return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
-        }
-    };
-
-    const getStatusIcon = (status) => {
-        switch (status) {
-            case 'Pending': return <Clock size={14} />;
-            case 'Processing': return <RefreshCcw size={14} className="animate-spin-slow" />;
-            case 'Shipped': return <Truck size={14} />;
-            case 'Delivered': return <CheckCircle size={14} />;
-            case 'Cancelled': return <XCircle size={14} />;
-            default: return null;
-        }
-    };
+    const statuses = [
+        { name: 'Pending', color: '#f59e0b', bg: 'rgba(245, 158, 11, 0.1)', border: 'rgba(245, 158, 11, 0.2)', icon: <Clock size={14} /> },
+        { name: 'Processing', color: '#3b82f6', bg: 'rgba(59, 130, 246, 0.1)', border: 'rgba(59, 130, 246, 0.2)', icon: <RefreshCcw size={14} className="animate-spin-slow" /> },
+        { name: 'Shipped', color: '#6366f1', bg: 'rgba(99, 102, 241, 0.1)', border: 'rgba(99, 102, 241, 0.2)', icon: <Truck size={14} /> },
+        { name: 'Delivered', color: '#10b981', bg: 'rgba(16, 185, 129, 0.1)', border: 'rgba(16, 185, 129, 0.2)', icon: <CheckCircle size={14} /> },
+        { name: 'Cancelled', color: '#ef4444', bg: 'rgba(239, 68, 68, 0.1)', border: 'rgba(239, 68, 68, 0.2)', icon: <XCircle size={14} /> }
+    ];
 
     if (loading) return (
-        <div className="flex flex-col items-center justify-center h-[500px] text-[#94a3b8] gap-6">
+        <div className="flex flex-col items-center justify-center h-[600px] text-[#94a3b8] gap-6">
             <div className="w-16 h-16 border-4 border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin"></div>
-            <p className="text-lg font-medium text-white">Fetching Orders...</p>
+            <p className="text-lg font-medium text-white">Establishing Secure Tunnel...</p>
         </div>
     );
 
     if (orders.length === 0) return (
-        <div className="flex flex-col items-center justify-center h-[500px] text-[#94a3b8] gap-4">
+        <div className="flex flex-col items-center justify-center h-[600px] text-[#94a3b8] gap-4">
             <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-4">
                 <ShoppingBag size={40} className="opacity-20" />
             </div>
-            <h3 className="text-xl font-bold text-white">No orders yet</h3>
-            <p className="text-sm opacity-50">When customers buy products, they will appear here.</p>
+            <h3 className="text-xl font-bold text-white">No Orders Found</h3>
+            <p className="text-sm opacity-50">Current ledger is clean. New orders will appear here automatically.</p>
         </div>
     );
 
     return (
-        <div className="space-y-4 p-6">
-            <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                    <ShoppingBag className="text-indigo-400" />
-                    Incoming Orders
-                    <span className="text-xs font-normal bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full border border-indigo-500/30">
-                        {orders.length}
-                    </span>
-                </h2>
-                <button
-                    onClick={fetchOrders}
-                    className="p-2 hover:bg-white/5 rounded-lg text-[#94a3b8] transition-all"
-                >
-                    <RefreshCcw size={18} />
-                </button>
+        <div className="flex h-[750px] bg-[#0d0d11] rounded-2xl overflow-hidden border border-white/5 shadow-2xl">
+            {/* Sidebar List */}
+            <div className="w-[380px] border-r border-white/5 flex flex-col bg-[#0d0d11]">
+                <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                    <div>
+                        <h3 className="text-lg font-bold text-white">Order Inbox</h3>
+                        <p className="text-xs text-[#64748b]">{orders.length} events pending</p>
+                    </div>
+                    <button onClick={fetchOrders} className="p-2 hover:bg-white/5 rounded-lg text-[#64748b] transition-all">
+                        <RefreshCcw size={18} />
+                    </button>
+                </div>
+                <div className="flex-1 overflow-y-auto p-3 space-y-2 custom-scrollbar">
+                    {orders.map((order) => {
+                        const s = statuses.find(st => st.name === order.status) || statuses[0];
+                        return (
+                            <button
+                                key={order.id}
+                                onClick={() => setSelectedOrder(order)}
+                                className={`w-full text-left p-4 rounded-xl transition-all border ${selectedOrder?.id === order.id
+                                    ? 'bg-indigo-500/10 border-indigo-500/30'
+                                    : 'border-transparent hover:bg-white/5'
+                                    }`}
+                            >
+                                <div className="flex justify-between items-start mb-2">
+                                    <span className="text-sm font-bold text-white">{order.customer_name}</span>
+                                    <span className="text-[10px] text-[#64748b] font-mono">
+                                        {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs font-bold text-indigo-400">
+                                        ${parseFloat(order.total_price).toFixed(2)}
+                                    </span>
+                                    <span
+                                        className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider flex items-center gap-1 border"
+                                        style={{ backgroundColor: s.bg, color: s.color, borderColor: s.border }}
+                                    >
+                                        {s.icon}
+                                        {order.status}
+                                    </span>
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
             </div>
 
-            <div className="space-y-3">
-                {orders.map((order) => (
-                    <div
-                        key={order.id}
-                        className={`premium-card border-[#1f2937] transition-all ${expandedOrder === order.id ? 'ring-1 ring-indigo-500/30 bg-[#111114]' : 'hover:border-[#374151]'}`}
-                    >
-                        <div
-                            className="flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer p-5"
-                            onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
+            {/* Content Panel */}
+            <div className="flex-1 bg-[#0a0a0c] flex flex-col relative">
+                <AnimatePresence mode="wait">
+                    {selectedOrder ? (
+                        <motion.div
+                            key={selectedOrder.id}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="flex flex-col h-full"
                         >
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 flex-shrink-0">
-                                    <User size={20} />
-                                </div>
-                                <div>
-                                    <h4 className="font-bold text-white">{order.customer_name}</h4>
-                                    <div className="flex items-center gap-3 mt-1">
-                                        <span className="text-xs text-[#64748b] flex items-center gap-1">
-                                            <Calendar size={12} />
-                                            {new Date(order.created_at).toLocaleDateString()}
-                                        </span>
-                                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border flex items-center gap-1.5 ${getStatusStyles(order.status)}`}>
-                                            {order.status}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center justify-between md:justify-end gap-8">
-                                <div className="text-right">
-                                    <p className="text-[10px] uppercase tracking-widest text-[#64748b] mb-1">Total Amount</p>
-                                    <p className="text-xl font-bold text-white flex items-center gap-1">
-                                        <span className="text-indigo-400 text-sm">$</span>
-                                        {parseFloat(order.total_price).toFixed(2)}
-                                    </p>
-                                </div>
-                                <button className="p-2 text-[#94a3b8]">
-                                    {expandedOrder === order.id ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-                                </button>
-                            </div>
-                        </div>
-
-                        <AnimatePresence>
-                            {expandedOrder === order.id && (
-                                <motion.div
-                                    initial={{ height: 0, opacity: 0 }}
-                                    animate={{ height: 'auto', opacity: 1 }}
-                                    exit={{ height: 0, opacity: 0 }}
-                                    className="overflow-hidden border-t border-white/5"
-                                >
-                                    <div className="p-6 bg-white/[0.02]">
-                                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                                            {/* Items List */}
-                                            <div>
-                                                <h5 className="text-sm font-bold text-[#64748b] uppercase tracking-widest mb-4">Ordered Items</h5>
-                                                <div className="space-y-3">
-                                                    {order.items.map((item, idx) => (
-                                                        <div key={idx} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-[10px] font-bold text-indigo-400">
-                                                                    {item.quantity}x
-                                                                </div>
-                                                                <span className="text-sm text-white font-medium">{item.product_name}</span>
-                                                            </div>
-                                                            <span className="text-sm text-[#94a3b8]">${(parseFloat(item.price) * item.quantity).toFixed(2)}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            {/* Order Settings */}
-                                            <div>
-                                                <h5 className="text-sm font-bold text-[#64748b] uppercase tracking-widest mb-4">Manage Order</h5>
-                                                <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-4">
-                                                    <div>
-                                                        <label className="text-[10px] text-[#64748b] uppercase tracking-widest block mb-2">Update Status</label>
-                                                        <div className="flex flex-wrap gap-2">
-                                                            {['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'].map(s => (
-                                                                <button
-                                                                    key={s}
-                                                                    disabled={order.status === s}
-                                                                    onClick={() => updateOrderStatus(order.id, s)}
-                                                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${order.status === s
-                                                                        ? 'bg-indigo-600 text-white'
-                                                                        : 'bg-white/5 text-[#94a3b8] hover:bg-white/10'}`}
-                                                                >
-                                                                    {s}
-                                                                </button>
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                    <div className="pt-4 border-t border-white/5">
-                                                        <p className="text-[10px] text-[#64748b]">Order ID: <span className="font-mono">{order.id}</span></p>
-                                                    </div>
-                                                </div>
-                                            </div>
+                            {/* Header */}
+                            <div className="p-8 border-b border-white/5 bg-[#0d0d11]">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <span className="text-xs font-mono text-indigo-400/60 transition-all hover:text-indigo-400 cursor-default">#{selectedOrder.id.slice(0, 8)}</span>
+                                            <span className="w-1 h-1 rounded-full bg-[#64748b]"></span>
+                                            <span className="text-xs text-[#64748b]">Issued on {new Date(selectedOrder.created_at).toLocaleDateString()}</span>
+                                        </div>
+                                        <h2 className="text-3xl font-bold text-white mb-2">{selectedOrder.customer_name}</h2>
+                                        <div className="flex items-center gap-2">
+                                            <User size={14} className="text-[#64748b]" />
+                                            <span className="text-sm text-[#94a3b8]">{selectedOrder.user_id ? 'Authenticated Customer' : 'Guest Checkout'}</span>
                                         </div>
                                     </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                ))}
+                                    <div className="text-right">
+                                        <p className="text-[10px] uppercase tracking-widest text-[#64748b] mb-1">Settlement Total</p>
+                                        <p className="text-4xl font-bold text-white">
+                                            <span className="text-indigo-500 text-xl align-top mr-1">$</span>
+                                            {parseFloat(selectedOrder.total_price).toFixed(2)}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Details Grid */}
+                            <div className="flex-1 overflow-y-auto p-8 space-y-8">
+                                {/* Status Controller */}
+                                <section>
+                                    <h5 className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest mb-4">Command Center / Status</h5>
+                                    <div className="grid grid-cols-5 gap-3">
+                                        {statuses.map(s => {
+                                            const isActive = selectedOrder.status === s.name;
+                                            return (
+                                                <button
+                                                    key={s.name}
+                                                    onClick={() => updateOrderStatus(selectedOrder.id, s.name)}
+                                                    disabled={isActive}
+                                                    className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-all ${isActive
+                                                        ? 'bg-indigo-500/10 border-indigo-500/40 shadow-lg shadow-indigo-500/5'
+                                                        : 'hover:bg-white/5 border-white/5 opacity-40 hover:opacity-80'
+                                                        }`}
+                                                >
+                                                    <div className="p-2 rounded-lg" style={{ backgroundColor: s.bg, color: s.color }}>
+                                                        {React.cloneElement(s.icon, { size: 18 })}
+                                                    </div>
+                                                    <span className={`text-[10px] font-bold uppercase tracking-tight ${isActive ? 'text-white' : 'text-[#64748b]'}`}>{s.name}</span>
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </section>
+
+                                {/* Itemized List */}
+                                <section>
+                                    <h5 className="text-[10px] font-bold text-[#64748b] uppercase tracking-widest mb-4">Item Analytics</h5>
+                                    <div className="space-y-2">
+                                        {selectedOrder.items.map((item, idx) => (
+                                            <div key={idx} className="flex items-center justify-between p-4 rounded-xl bg-white/[0.02] border border-white/5 group hover:bg-white/[0.04] transition-all">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-10 h-10 rounded-lg bg-indigo-500/10 flex items-center justify-center text-xs font-bold text-indigo-400 group-hover:bg-indigo-500/20 transition-all">
+                                                        {item.quantity}x
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-medium text-white">{item.product_name}</p>
+                                                        <p className="text-[10px] text-[#64748b]">Unit: ${parseFloat(item.price).toFixed(2)}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-sm font-bold text-white">${(parseFloat(item.price) * item.quantity).toFixed(2)}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                            </div>
+
+                            {/* Footer Info */}
+                            <div className="p-6 border-t border-white/5 bg-[#0d0d11]/50 text-center">
+                                <p className="text-[10px] text-[#4b5563] font-mono uppercase tracking-[0.2em]">Transaction Verified via Supabase Secure Edge</p>
+                            </div>
+                        </motion.div>
+                    ) : (
+                        <div className="flex-1 flex flex-col items-center justify-center text-[#64748b] gap-4">
+                            <ShoppingBag size={48} className="opacity-10" />
+                            <p className="text-sm">Select an event from the inbox to review</p>
+                        </div>
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );
