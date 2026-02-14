@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Plus, Package, AlertCircle, Loader2, LayoutDashboard, CheckCircle, XCircle, RefreshCcw, Menu, X } from 'lucide-react'
+import { Plus, Package, AlertCircle, Loader2, LayoutDashboard, CheckCircle, XCircle, RefreshCcw, Menu, X, ShoppingBag } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { supabase } from './lib/supabase'
 import ProductList from './components/ProductList'
