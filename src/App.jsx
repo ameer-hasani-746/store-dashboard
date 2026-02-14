@@ -283,7 +283,7 @@ function App() {
 
 
             {currentView === 'inventory' ? (
-              <div className="premium-card min-h-[500px] overflow-hidden relative">
+              <div className="premium-card relative overflow-hidden" style={{ minHeight: '500px' }}>
                 <AnimatePresence mode="wait">
                   {loading ? (
                     <motion.div
@@ -291,12 +291,13 @@ function App() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="flex flex-col items-center justify-center h-[500px] text-[#94a3b8] gap-6"
+                      className="flex flex-col items-center justify-center h-full text-[#94a3b8]"
+                      style={{ gap: '24px', minHeight: '500px' }}
                     >
                       <div className="relative">
                         <div className="w-16 h-16 border-4 border-indigo-500/10 border-t-indigo-500 rounded-full animate-spin"></div>
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <Loader2 className="animate-pulse text-indigo-400" size={24} />
+                          <RefreshCcw className="animate-pulse text-indigo-400" size={24} />
                         </div>
                       </div>
                       <div className="flex flex-col items-center">
