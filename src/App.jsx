@@ -9,7 +9,43 @@ import OrderList from './components/OrderList'
 
 // Error Boundary Component to prevent white screen of death
 class ErrorBoundary extends React.Component {
-  // ... (rest of ErrorBoundary remains same, omitted for brevity but should be kept)
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("Critical Render Error:", error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center bg-[#0a0a0c] text-[#f8fafc]">
+          <div className="premium-card max-w-md border-red-500/20 p-10 bg-[#141417] rounded-2xl border">
+            <XCircle size={64} className="text-red-500 mb-6 mx-auto opacity-80" />
+            <h2 className="text-3xl font-bold mb-4 font-display">System Alert</h2>
+            <p className="text-[#94a3b8] mb-8 leading-relaxed">
+              {this.state.error?.message || "A critical rendering error occurred."}
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              className="btn-primary mx-auto shadow-lg shadow-indigo-500/20"
+            >
+              <RefreshCcw size={18} />
+              Reboot Terminal
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
 }
 
 function App() {
