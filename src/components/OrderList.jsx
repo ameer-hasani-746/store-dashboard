@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { ShoppingBag, Clock, CheckCircle, Truck, XCircle, User, DollarSign, Calendar, RefreshCcw } from 'lucide-react';
+import { ShoppingBag, Clock, CheckCircle, Truck, XCircle, User, DollarSign, Calendar, RefreshCcw, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const OrderList = ({ setActionLoading }) => {
@@ -22,7 +22,8 @@ const OrderList = ({ setActionLoading }) => {
 
             if (error) throw error;
             setOrders(data || []);
-            if (data && data.length > 0 && !selectedOrder) {
+            // Auto-select first order only on desktop (width > 768)
+            if (data && data.length > 0 && !selectedOrder && window.innerWidth > 768) {
                 setSelectedOrder(data[0]);
             }
         } catch (err) {
@@ -77,7 +78,7 @@ const OrderList = ({ setActionLoading }) => {
     );
 
     return (
-        <div className="order-console">
+        <div className={`order-console ${selectedOrder ? 'details-active' : ''}`}>
             {/* Inbox Sidebar */}
             <div className="order-sidebar">
                 <div className="order-sidebar-header">
@@ -133,7 +134,22 @@ const OrderList = ({ setActionLoading }) => {
                             style={{ display: 'flex', flexDirection: 'column', height: '100%' }}
                         >
                             <div className="order-receipt-header">
-                                <div>
+                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                    {/* Back Button for Mobile */}
+                                    <button
+                                        className="show-mobile"
+                                        onClick={() => setSelectedOrder(null)}
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            color: 'var(--accent-primary)',
+                                            marginBottom: '20px',
+                                            fontWeight: '600'
+                                        }}
+                                    >
+                                        <ChevronLeft size={20} /> Back to Inbox
+                                    </button>
                                     <div className="order-id-chip" style={{ marginBottom: '12px' }}>#{selectedOrder.id}</div>
                                     <h2 style={{ fontSize: '32px', fontWeight: '800', color: 'white', margin: '0 0 8px 0' }}>{selectedOrder.customer_name}</h2>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--text-muted)', fontSize: '14px' }}>
